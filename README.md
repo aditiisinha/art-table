@@ -66,7 +66,7 @@ App runs at: http://localhost:5173/
 
 🌐 Deployment
 
-The app is deployed on Netlify/Cloudflare (not Vercel).
+The app is deployed on Netlify
 
 🔗 Live Demo: https://art-table1.netlify.app
 
