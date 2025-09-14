@@ -1,11 +1,17 @@
 // src/components/ArtTable.tsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { DataTable } from "primereact/datatable";
 import type { DataTablePageEvent } from "primereact/datatable";
 import type { DataTableSelectionMultipleChangeEvent } from "primereact/datatable";
 import { Column } from "primereact/column";
 import type { Artwork } from "./api";
 import { fetchArtworksPage } from "./api";
+
+// ✅ Needed imports
+import { OverlayPanel } from "primereact/overlaypanel";
+import { InputNumber } from "primereact/inputnumber";
+import { Button } from "primereact/button";
+
 import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
@@ -18,6 +24,10 @@ const ArtTable: React.FC = () => {
 
   const [first, setFirst] = useState<number>(0);
   const [rows, setRows] = useState<number>(12); // ✅ max 12 per page
+
+  // ✅ Overlay states
+  const op = useRef<OverlayPanel>(null);
+  const [rowsToSelect, setRowsToSelect] = useState<number>(0);
 
   // Fetch artworks
   const loadData = async (page: number, limit: number) => {
@@ -50,12 +60,59 @@ const ArtTable: React.FC = () => {
 
     // merge current page selection with previously stored selections
     const merged = [
-      ...selectedArtworks.filter((item) => !pageIds.includes(item.id)), // keep selections from other pages
-      ...newSelection, // add selections from this page
+      ...selectedArtworks.filter((item) => !pageIds.includes(item.id)),
+      ...newSelection,
     ];
 
     setSelectedArtworks(merged);
   };
+
+  // ✅ Handle overlay submit
+  const handleOverlaySubmit = () => {
+    if (rowsToSelect > 0) {
+      const autoSelect = artworks.slice(0, rowsToSelect);
+      const pageIds = artworks.map((a) => a.id);
+
+      const merged = [
+        ...selectedArtworks.filter((item) => !pageIds.includes(item.id)),
+        ...autoSelect,
+      ];
+      setSelectedArtworks(merged);
+    }
+    op.current?.hide();
+  };
+
+  // ✅ Custom header for Artwork with chevron on LEFT
+  const artworkHeader = (
+    <div className="flex items-center gap-2">
+      <i
+        className="pi pi-chevron-down cursor-pointer"
+        onClick={(e) => op.current?.toggle(e)}
+      />
+      <span>Artwork</span>
+      <OverlayPanel ref={op} dismissable>
+        <div className="p-3 w-60">
+          <label className="block mb-2 text-sm font-medium">Select rows</label>
+          <InputNumber
+            value={rowsToSelect}
+            onValueChange={(e) => setRowsToSelect(e.value ?? 0)}
+            className="w-full mb-3"
+            // ✅ removed showButtons to hide increment/decrement buttons
+          />
+          <Button
+            label="Submit"
+            className="w-full"
+            style={{
+              backgroundColor: '#e5e7eb', // light gray (Tailwind gray-200 equivalent)
+              borderColor: '#d1d5db',     // slightly darker border
+              color: 'black'    
+            }}
+            onClick={handleOverlaySubmit}
+          />
+        </div>
+      </OverlayPanel>
+    </div>
+  );
 
   return (
     <div className="p-6">
@@ -75,13 +132,19 @@ const ArtTable: React.FC = () => {
           onPage={onPageChange}
           loading={loading}
           paginatorTemplate="PrevPageLink PageLinks NextPageLink"
-          rowsPerPageOptions={[12]} // ✅ only 12 per page allowed
+          rowsPerPageOptions={[12]}
           tableStyle={{ minWidth: "50rem" }}
           metaKeySelection={false}
           className="p-datatable-sm"
         >
           <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} />
-          <Column field="title" header="Artwork" sortable style={{ minWidth: "200px" }} />
+          {/* ✅ updated header here */}
+          <Column
+            field="title"
+            header={artworkHeader}
+            sortable
+            style={{ minWidth: "200px" }}
+          />
           <Column field="place_of_origin" header="Place of Origin" sortable style={{ minWidth: "150px" }} />
           <Column field="artist_display" header="Artist" sortable style={{ minWidth: "150px" }} />
           <Column field="inscriptions" header="Inscriptions" sortable style={{ minWidth: "150px" }} />
