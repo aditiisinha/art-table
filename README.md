@@ -51,6 +51,7 @@ PrimeIcons (icons for chevron, etc.)
 PrimeFlex (optional for styling utilities)
 
 ⚙️ Installation & Setup
+
 1️⃣ Clone the Repository
 git clone https://github.com/your-username/your-repo.git
 cd your-repo
