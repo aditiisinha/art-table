@@ -1,4 +1,3 @@
-// src/components/ArtTable.tsx
 import React, { useEffect, useState, useRef } from "react";
 import { DataTable } from "primereact/datatable";
 import type { DataTablePageEvent } from "primereact/datatable";
@@ -7,7 +6,6 @@ import { Column } from "primereact/column";
 import type { Artwork } from "./api";
 import { fetchArtworksPage } from "./api";
 
-// ✅ Needed imports
 import { OverlayPanel } from "primereact/overlaypanel";
 import { InputNumber } from "primereact/inputnumber";
 import { Button } from "primereact/button";
@@ -23,13 +21,11 @@ const ArtTable: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const [first, setFirst] = useState<number>(0);
-  const [rows, setRows] = useState<number>(12); // ✅ max 12 per page
+  const [rows, setRows] = useState<number>(12); 
 
-  // ✅ Overlay states
   const op = useRef<OverlayPanel>(null);
   const [rowsToSelect, setRowsToSelect] = useState<number>(0);
 
-  // Fetch artworks
   const loadData = async (page: number, limit: number) => {
     setLoading(true);
     try {
@@ -53,12 +49,10 @@ const ArtTable: React.FC = () => {
     setRows(event.rows);
   };
 
-  // ✅ Persist selection across pages
   const onSelectionChange = (e: DataTableSelectionMultipleChangeEvent<Artwork[]>) => {
     const newSelection = e.value || [];
     const pageIds = artworks.map((a) => a.id);
 
-    // merge current page selection with previously stored selections
     const merged = [
       ...selectedArtworks.filter((item) => !pageIds.includes(item.id)),
       ...newSelection,
@@ -67,7 +61,6 @@ const ArtTable: React.FC = () => {
     setSelectedArtworks(merged);
   };
 
-  // ✅ Handle overlay submit
   const handleOverlaySubmit = () => {
     if (rowsToSelect > 0) {
       const autoSelect = artworks.slice(0, rowsToSelect);
@@ -82,7 +75,6 @@ const ArtTable: React.FC = () => {
     op.current?.hide();
   };
 
-  // ✅ Custom header for Artwork with chevron on LEFT
   const artworkHeader = (
     <div className="flex items-center gap-2">
       <i
@@ -97,14 +89,13 @@ const ArtTable: React.FC = () => {
             value={rowsToSelect}
             onValueChange={(e) => setRowsToSelect(e.value ?? 0)}
             className="w-full mb-3"
-            // ✅ removed showButtons to hide increment/decrement buttons
           />
           <Button
             label="Submit"
             className="w-full"
             style={{
-              backgroundColor: '#e5e7eb', // light gray (Tailwind gray-200 equivalent)
-              borderColor: '#d1d5db',     // slightly darker border
+              backgroundColor: '#e5e7eb', 
+              borderColor: '#d1d5db',     
               color: 'black'    
             }}
             onClick={handleOverlaySubmit}
@@ -138,7 +129,7 @@ const ArtTable: React.FC = () => {
           className="p-datatable-sm"
         >
           <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} />
-          {/* ✅ updated header here */}
+ 
           <Column
             field="title"
             header={artworkHeader}
@@ -153,7 +144,7 @@ const ArtTable: React.FC = () => {
         </DataTable>
       </div>
 
-      {/* ✅ Custom selection panel */}
+ 
       {selectedArtworks.length > 0 && (
         <div className="mt-4 p-3 bg-blue-100 border border-blue-300 rounded">
           <p className="text-blue-800 font-medium mb-2">
